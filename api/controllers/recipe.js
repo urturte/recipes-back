@@ -16,6 +16,7 @@ async function createRecipe(req, res) {
     servings: req.body.servings,
     ingredientList: req.body.ingredientList,
     description: req.body.description,
+    keywords: [""],
   });
   recipe.save();
   UserSchema.updateOne(
@@ -38,32 +39,56 @@ async function createRecipe(req, res) {
     });
 }
 
-async function getMyRecipes(req, res) {
-  const data = await UserSchema.aggregate([
+async function addKeyword(req, res) {
+  const recipe = await RecipeSchema.findOne({
+    _id: req.params.id,
+  }).exec();
+  RecipeSchema.updateOne(
+    { _id: req.params.id },
     {
-      $lookup: {
-        from: "recipes",
-        localField: "recipes",
-        foreignField: "_id",
-        as: "userRecipes",
-      },
-    },
-    { $match: { _id: ObjectId(req.body.userId) } },
-  ]).exec();
+      $push: { keywords: req.body.keywords.toString() },
+    }
+  )
+    .exec()
+    .then((result) => {
+      return res.status(200).json({
+        statusMessage: "Recipe added to Your virtual recipe book",
+        user: result,
+        recipe: recipe,
+      });
+    })
+    .catch((err) => {
+      console.log("Error occured", err);
+      res.status(404).json({ response: "Error try again" });
+    });
+}
 
-  console.log(data);
+async function getMyRecipes(req, res) {
+  // const data = await UserSchema.aggregate([
+  //   {
+  //     $lookup: {
+  //       from: "recipes",
+  //       localField: "recipes",
+  //       foreignField: "_id",
+  //       as: "userRecipes",
+  //     },
+  //   },
+  //   { $match: { _id: ObjectId(req.body.userId) } },
+  // ]).exec();
 
-  return res.status(200).json({ userWithRecipes: data });
+  // console.log(data);
 
-  // RecipeSchema.find()
-  //   .sort(" name")
-  //   .then((result) => {
-  //     return res.status(200).json({ recipes: result });
-  //   })
-  //   .catch((err) => {
-  //     console.log("err", err);
-  //     res.status(404).json({ response: "Something went wrong" });
-  //   });
+  // return res.status(200).json({ userWithRecipes: data });
+
+  RecipeSchema.find()
+    .sort(" name")
+    .then((result) => {
+      return res.status(200).json({ recipes: result });
+    })
+    .catch((err) => {
+      console.log("err", err);
+      res.status(404).json({ response: "Something went wrong" });
+    });
 }
 
 export function getRecipeById(req, res) {
@@ -76,4 +101,4 @@ export function getRecipeById(req, res) {
       res.status(404).json({ response: "Something went wrong" });
     });
 }
-export { createRecipe, getMyRecipes };
+export { createRecipe, getMyRecipes, addKeyword };

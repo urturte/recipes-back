@@ -12,11 +12,12 @@ import mongoose from "mongoose";
 
 const RecipeSchema = mongoose.Schema({
   title: { type: String, required: true },
-  image: { type: String, required: true },
+  image: { type: String },
   prepTime: { type: String },
   servings: { type: Number },
-  ingredientList: { type: Array, required: true },
-  description: { type: Array, required: true },
+  ingredientList: { type: String },
+  description: { type: String },
+  keywords: { type: Array },
 });
 
 export default mongoose.model("Recipe", RecipeSchema);

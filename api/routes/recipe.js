@@ -10,6 +10,11 @@ router.post(
   // auth,
   recipeController.createRecipe
 );
+router.put(
+  "/recipe/:id",
+  // auth,
+  recipeController.addKeyword
+);
 
 router.get(
   "/myRecipes",
